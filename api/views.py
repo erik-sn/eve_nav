@@ -57,6 +57,10 @@ def get_distance_name(request, origin, destination):
     return JSONResponse({'distance': distance})
 
 
+def get_data(request, solarSystemID, victimShipID, x, y, z):
+    return JSONResponse({'test': 'test'})
+
+
 class JSONResponse(HttpResponse):
     """
     An HttpResponse that renders its content into JSON.
