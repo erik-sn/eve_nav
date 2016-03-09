@@ -1,0 +1,11 @@
+;;files to ignore
+settings.py
+universeDataDx.db
+
+;;extensions to ignore
+*.log
+*.pot
+*.pyc
+
+;;directories to ignore
+.idea/
