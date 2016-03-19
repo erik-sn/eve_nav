@@ -2,18 +2,14 @@ import datetime
 
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.renderers import JSONRenderer
-from api.routing import dijkstra_search
-from api.routing import breadth_first_search
-from api.routing import get_distance
-from api.routing import get_system_id
-
-
+from api.routing import *
 
 def index(request):
     return render(request, 'api/api.html')
 
-
+@csrf_exempt
 def get_route_name(request, origin, destination):
     origin_id = get_system_id(origin)
     destination_id = get_system_id(destination)
@@ -30,7 +26,7 @@ def get_route_name(request, origin, destination):
     return JSONResponse({'jumps': jumps, 'path': pathName, 'time': (end - start)})
 
 
-
+@csrf_exempt
 def get_route_id(request, origin, destination):
     start = datetime.datetime.now()
 
@@ -45,16 +41,31 @@ def get_route_id(request, origin, destination):
     return JSONResponse({'jumps': jumps, 'path': pathName, 'time': (end - start)})
 
 
+@csrf_exempt
 def get_distance_id(request, origin, destination):
     distance = get_distance(origin, destination)
     return JSONResponse({'distance': distance})
 
 
+@csrf_exempt
 def get_distance_name(request, origin, destination):
     origin_id = get_system_id(origin)
     destination_id = get_system_id(destination)
     distance = get_distance(origin_id, destination_id)
     return JSONResponse({'distance': distance})
+
+
+@csrf_exempt
+def get_jump_range(request, origin, jumps):
+    print(get_pg_connection())
+    return JSONResponse({'distance': 0})
+
+
+def test_create(request):
+    compile_system_jumps()
+    return JSONResponse({'distance': 'test'})
+
+
 
 
 class JSONResponse(HttpResponse):

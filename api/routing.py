@@ -1,9 +1,14 @@
 from queue import Queue
+import re
+import threading
+import time
 
 import heapq
 import sqlite3
+from django.db import connection
 import math
 
+lock = threading.Lock()
 
 def get_system_id(system_name):
     conn = get_dd_connection()
@@ -81,17 +86,6 @@ def breadth_first_search(origin, destination, systems):
     return get_path(origin, destination, source, [])
 
 
-def find_systems():
-    conn = get_dd_connection()
-    c = conn.cursor()
-
-    systems = []
-    for row in c.execute('SELECT `fromSolarSystemID`, `toSolarSystemID` FROM `mapSolarSystemJumps`'):
-        systems.append(row)
-    close_connection(c, conn)
-    return systems
-
-
 def find_neighbors(origin, systems):
     neighbors = []
     for row in systems:
@@ -110,9 +104,42 @@ def get_path(origin, destination, jumps, path):
     return get_path(origin, jumps[destination], jumps, path)
 
 
+def find_systems():
+    conn = get_dd_connection()
+    c = conn.cursor()
+
+    systems = []
+    for row in c.execute('SELECT `fromSolarSystemID`, `toSolarSystemID` FROM `mapSolarSystemJumps`'):
+        systems.append(row)
+    close_connection(c, conn)
+    return systems
+
+
+def find_kspace_systems():
+    conn = get_dd_connection()
+    c = conn.cursor()
+    systems = []
+    query = 'SELECT solarSystemID, solarSystemName FROM mapSolarSystems ORDER BY solarSystemID ASC'
+    for row in c.execute(query):
+        system_name = str(row[1])
+        if re.match('[J][0-9]{6}', system_name):
+            print('Ignoring %s' % system_name)
+        else:
+            print('Adding %s' % system_name)
+            systems.append(int(row[0]))
+
+    close_connection(c, conn)
+    return systems
+
+
+
 def get_dd_connection():
     conn = sqlite3.connect('universeDataDx.db')
     return conn
+
+
+def get_pg_connection():
+    return connection.cursor().connection
 
 
 def close_connection(cursor, connection):
