@@ -3,7 +3,12 @@ import datetime
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+
+from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.renderers import JSONRenderer
+from rest_framework.response import Response
+
 from api.routing import *
 
 def index(request):
@@ -56,14 +61,14 @@ def get_distance_name(request, origin, destination):
 
 
 @csrf_exempt
-def get_jump_range(request, origin, jumps):
-    print(get_pg_connection())
-    return JSONResponse({'distance': 0})
+def get_jump_range(request, origin, jump):
+    origins = origin.split(",")
+    jumps = jump.split(",")
+    if len(origins) == len(jumps):
+        systems = systems_in_range(list(map(int, origins)), list(map(int, jumps)))
+        return JSONResponse({'systems': systems})
+    return JSONResponse({'systems': []})
 
-
-def test_create(request):
-    compile_system_jumps()
-    return JSONResponse({'distance': 'test'})
 
 
 

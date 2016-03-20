@@ -1,14 +1,13 @@
 from queue import Queue
-import re
-import threading
-import time
+from django.db import connection
+from api.models import Jumpdistance
 
+import re
 import heapq
 import sqlite3
-from django.db import connection
+import psycopg2
 import math
 
-lock = threading.Lock()
 
 def get_system_id(system_name):
     conn = get_dd_connection()
@@ -26,6 +25,34 @@ def get_distance(origin, destination):
     print(distance)
     return distance
 
+
+def systems_in_range(origins, jumps):
+    print(origins)
+    print(jumps)
+    systems = []
+    params = ()
+    sql = 'SELECT system1, system2 FROM jumpdistance WHERE 1=1 AND ('
+    for i in range(len(origins)):
+        if i != 0:
+             sql += ' OR ((system1 = %s OR system2 = %s) AND jumps <= %s)'
+        else:
+             sql += ' ((system1 = %s OR system2 = %s) AND jumps <= %s)'
+
+        param = (origins[i], origins[i], jumps[i])
+        params += param
+    sql += ') ORDER BY system1'
+
+
+    c = connection.cursor()
+    c.execute(sql, params)
+    for row in c.fetchall():
+        if row[0] not in origins:
+            systems.append(row[0])
+        else:
+            systems.append(row[1])
+    print(sql)
+    print('Results: %s' % len(systems))
+    return systems
 
 def find_system_info(system_id):
     conn = get_dd_connection()

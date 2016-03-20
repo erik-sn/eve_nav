@@ -121,6 +121,7 @@ class DjangoSession(models.Model):
 
 
 class Jumpdistance(models.Model):
+    id = models.AutoField(primary_key=True)
     system1 = models.IntegerField(blank=True, null=True)
     system2 = models.IntegerField(blank=True, null=True)
     route = models.TextField(blank=True, null=True)
