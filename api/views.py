@@ -71,8 +71,6 @@ def get_jump_range(request, origin, jump):
 
 
 
-
-
 class JSONResponse(HttpResponse):
     """
     An HttpResponse that renders its content into JSON.
